@@ -19,29 +19,36 @@ class Profile extends Component {
             data: {},
             repositories: [],
             loading: true,
+            error: '',
         }
     }
 
     async componentDidMount() {
-        const profile = await fetch('https://api.github.com/users/octocat');
-        const profileJSON = await profile.json();
+        try {
+            const profile = await fetch('https://api.github.com/users/octocat');
+            const profileJSON = await profile.json();
 
-        if(profileJSON) {
-            const repositories = await fetch(profileJSON.repos_url);
-            const repositoriesJSON = await repositories.json();
+            if(profileJSON) {
+                const repositories = await fetch(profileJSON.repos_url);
+                const repositoriesJSON = await repositories.json();
 
-            this.setState({ 
-                data: profileJSON,
-                repositories: repositoriesJSON,  
-                loading: false, 
-            })
+                this.setState({ 
+                    data: profileJSON,
+                    repositories: repositoriesJSON,  
+                    loading: false, 
+                });
+            } 
+        } catch(error) {
+            this.setState({
+                loading: false, error: error.message, 
+            });
         }
     }
 
     render() {
-        const { data, loading, repositories } = this.state;
-        if (loading) {
-            return <div>Loading ...</div>
+        const { data, loading, repositories, error } = this.state;
+        if (loading || error ) {
+            return <div>{ loading ? 'Loading ...' : error }</div>
         }
         
         const items = [
